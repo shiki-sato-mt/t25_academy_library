@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns:th="http://www.thymeleaf.org">
  
-<head th:replace="~{common :: meta_header('書籍登録',~{::link},~{::script})}">
+<head th:replace="~{common :: meta_header('書籍編集',~{::link},~{::script})}">
     <title th:text="${title}+' | MTLibrary'"></title>
-    <link rel="stylesheet" th:href="@{/css/book/add.css}" />
-    <script type="text/javascript" th:src="@{/js/book/add.js}"></script>
+    <link rel="stylesheet" th:href="@{/css/book/edit.css}" />
+    <!-- <script type="text/javascript" th:src="@{/js/book/edit.js}"defer ></script> -->
 </head>
  
 <body>
@@ -13,9 +13,12 @@
         <div class="main_contents">
             <div th:replace="~{common :: header}"></div>
             <div class="inner_contens">
-                <div class="page_title">書籍登録</div>
+                <div class="page_title">書籍編集</div>
                 <div class="page_contents">
-                    <form id="book_register_form" th:object="${bookMstDto}" th:action="@{/book/add}" method="post">
+                    </div>
+                    <form id="book_register_form" th:object="${bookMstDto}" th:action="@{/book/edit}" method="post">
+                        <input type="hidden" th:field="*{id}" />
+
                         <table>
                             <p style="font-size: 12px; color: red;">*これは必須項目です</p>
                             <span>
@@ -46,15 +49,22 @@
                                 </tr>
                             </tbody>
                         </table>
-                        <button type="submit">保存</button>
+                        <button type="submit">変更</button>
                         <div class="mb30 flexarea"></div>
                     </form>
                 </div>
             </div>
         </div>
     </div>
+    <div id="flash-message" th:if="${infoMessage}" th:attr="data-message=${infoMessage}"></div>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const msg = document.getElementById("flash-message")?.dataset.message;
+            if (msg) {
+                alert(msg);
+            }
+        });
+    </script>
     <div th:replace="~{common :: footer}"></div>
 </body>
 </html>
- 
- 

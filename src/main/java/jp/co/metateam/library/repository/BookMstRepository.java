@@ -19,6 +19,10 @@ public interface BookMstRepository extends JpaRepository<BookMst, Long> {
 
 	boolean existsByIsbn(String isbn);
 
+	// 書籍変更で使用
+	Optional<BookMst> findByIsbn(String isbn);
+
+
 
 
 }

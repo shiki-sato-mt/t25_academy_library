@@ -12,10 +12,11 @@
             <div th:replace="~{common :: header}"></div>
             <div class="inner_contens">
                 <div class="page_title">書籍一覧</div>
+                 </div>
+                
 
-                <dr>
+
                     <a th:href="@{/book/add}"> <button>書籍登録</button></a>
-                </dr>
                 <table class ="books_table">
                     <thead>
                         <tr>
@@ -25,7 +26,21 @@
                     </thead>
                     <tbody>
                         <tr th:each="book : ${bookMstList}">
-                            <td th:text="${book.title}">書籍タイトル</td>
+                            <td>
+                                
+                                <!-- 編集ボタン -->
+                                <a th:href="@{/book/edit/{id}(id=${book.id})}" class="edit_btn" title="編集">
+                                    <img th:src="@{/images/icons/edit.png}" alt="編集" style="width:20px; height:20px; margin-left:8px;" />
+                                </a>
+                            
+                                <!-- 削除ボタン -->
+                                <a th:href="@{'/book/delete'}" title="削除" onclick="return confirm('本当に削除しますか？')">
+                                    <img th:src="@{/images/icons/trash.png}" alt="削除" style="width:20px; height:20px; margin-left:4px;" />
+                                </a>
+
+                                <span th:text="${book.title}">書籍タイトル</span>
+                            </td>
+                            
                             <td th:text="${book.isbn}">ISBNコード</td>
                         </tr>
                     </tbody>
@@ -35,4 +50,30 @@
         </div>
     </div>
     <div th:replace="~{common :: footer}"></div>
+    <!-- 成功メッセージ表示用 -->
+<div id="flash-message" th:if="${successMessage}" th:attr="data-message=${successMessage}"></div>
+<!-- エラーメッセージ表示用 -->
+<div id="error-message" th:if="${errorMessage}" th:attr="data-message=${errorMessage}"></div>
 </body>
+
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const flash = document.getElementById("flash-message");
+        const msg = flash?.dataset.message;
+        if (msg) {
+            alert(msg);
+            flash.remove(); // 表示後に削除して再表示を防止
+        }
+        
+        const error = document.getElementById("error-message");
+const errorMsg = error?.dataset.message;
+if (errorMsg) {
+    alert(errorMsg);
+    error.remove(); // 再表示防止
+}
+
+    });
+</script>
+

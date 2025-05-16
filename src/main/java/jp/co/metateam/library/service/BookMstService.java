@@ -66,13 +66,41 @@ public class BookMstService {
         return bookMstRepository.existsByIsbn(isbn);
     }
     
+    // 書籍編集
+public BookMstDto findById(Long id) {
+    BookMst entity = bookMstRepository.findById(id).orElse(null);
+    if (entity == null) return null;
+ 
+    BookMstDto dto = new BookMstDto();
+    dto.setId(entity.getId());
+    dto.setTitle(entity.getTitle());
+    dto.setIsbn(entity.getIsbn());
+    return dto;
+}
 
+// updateメソッド
+@Transactional
+public void update(BookMstDto bookMstDto) {
+    Optional<BookMst> optional = bookMstRepository.findById(bookMstDto.getId());
+    if (optional.isPresent()) {
+        BookMst book = optional.get();
+        book.setTitle(bookMstDto.getTitle());
+        book.setIsbn(bookMstDto.getIsbn());
+        bookMstRepository.save(book);
+    } else {
+        throw new IllegalArgumentException("指定されたIDの書籍が見つかりません");
+    }
+}
 
+// 書籍変更バリデーション
+public boolean existsByIsbnAndNotId(String isbn, Long id) {
+    Optional<BookMst> book = bookMstRepository.findByIsbn(isbn);
+    return book.isPresent() && !book.get().getId().equals(id);
 }
 
 
 
 
 
-    
+}
 
