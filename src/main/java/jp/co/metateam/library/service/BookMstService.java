@@ -1,6 +1,9 @@
 package jp.co.metateam.library.service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.sql.Timestamp;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -105,16 +108,29 @@ public boolean deleteBook(Long id) {
     Optional<BookMst> optional = bookMstRepository.findById(id);
     if (optional.isPresent()) {
         BookMst book = optional.get();
+
+        ZonedDateTime japanTime = ZonedDateTime.now(ZoneId.of("Asia/Tokyo"));
+        Timestamp now = Timestamp.valueOf(japanTime.toLocalDateTime());
+
         if (book.getDeletedFlag() == 1) {
-            return false; // 既に削除されている
+            // すでに削除済み → 削除日時が未設定なら設定して保存
+            if (book.getDeletedAt() == null || book.getDeletedAt().toString().isBlank()) {
+                book.setDeletedAt(now);
+                bookMstRepository.save(book);
+            }
+            return false; // 既に削除済み
         }
+
+        // 通常の削除処理
         book.setDeletedFlag(1);
-        book.setDeletedAt(Timestamp.valueOf(LocalDateTime.now()));
+        book.setDeletedAt(now);
         bookMstRepository.save(book);
         return true;
     }
-    return false;
+
+    return false; // 該当IDなし
 }
+
 
 public List<BookMstDto> findLimitedBooksOnlyNotDeleted() {
     // 削除されていない書籍だけ取得するように修正
@@ -131,6 +147,7 @@ public List<BookMstDto> findLimitedBooksOnlyNotDeleted() {
 
     return bookMstDtoList;
 }
+
 
 
 
