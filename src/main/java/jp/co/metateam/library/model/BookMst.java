@@ -1,7 +1,10 @@
 package jp.co.metateam.library.model;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
+
+import org.hibernate.type.descriptor.jdbc.TinyIntAsSmallIntJdbcType;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -35,6 +38,10 @@ public class BookMst {
     @Column(name = "deleted_at")
     private Timestamp deletedAt;
 
+    @Column(name = "deleted_flag", nullable = false)
+    private int deletedFlag = 0;
+    
+    
     /** Getters */
 
     public Long getId() {
@@ -53,6 +60,11 @@ public class BookMst {
         return this.deletedAt;
     }
 
+    public Integer getDeletedFlag() {
+        return deletedFlag;
+    }
+
+
     /** Setters */
 
     public void setId(Long id) {
@@ -70,4 +82,10 @@ public class BookMst {
     public void setDeletedAt(Timestamp deletedAt) {
         this.deletedAt = deletedAt;
     }
+
+    public void setDeletedFlag(Integer deletedFlag) {
+        this.deletedFlag = deletedFlag;
+    }
+
+
 }

@@ -22,7 +22,9 @@ public interface BookMstRepository extends JpaRepository<BookMst, Long> {
 	// 書籍変更で使用
 	Optional<BookMst> findByIsbn(String isbn);
 
-
+	@Query(value = "SELECT * FROM book_mst WHERE deleted_flag = 0 LIMIT 1000", nativeQuery = true)
+	List<BookMst> findLimitedBooksOnlyNotDeleted(); 
+	
 
 
 }

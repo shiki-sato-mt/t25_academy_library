@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import jakarta.validation.Valid;
@@ -19,6 +20,7 @@ import jp.co.metateam.library.model.Account;
 import jp.co.metateam.library.model.AccountDto;
 import jp.co.metateam.library.model.BookMst;
 import jp.co.metateam.library.model.BookMstDto;
+import jp.co.metateam.library.repository.BookMstRepository;
 import jp.co.metateam.library.service.BookMstService;
 import lombok.extern.log4j.Log4j2;
 // 書籍編集で入力
@@ -42,13 +44,16 @@ public class BookController {
 
     @GetMapping("/book/index")
     public String index(Model model) {
-        // 書籍を全件取得
-        List<BookMstDto> bookMstList = this.bookMstService.findAvailableWithStockCount();
+        // 削除済みを除外して取得
+        List<BookMstDto> bookMstList = this.bookMstService.findLimitedBooksOnlyNotDeleted();
         
         model.addAttribute("bookMstList", bookMstList);
 
         return "book/index";
     }
+
+
+    
 
     @GetMapping("/book/add")
     public String add(Model model) {
@@ -58,17 +63,6 @@ public class BookController {
 
         return "book/add";
     }
-
-    // @GetMapping("/book/edit")
-    // public String edit(Model model) {
-    //     if (!model.containsAttribute("bookMstDto")) {
-    //         model.addAttribute("bookMstDto", new BookMstDto());
-    //     }
-
-    //     return "book/edit";
-    // }
-
- 
 
 
     //書籍登録バリデーション
@@ -104,7 +98,7 @@ public class BookController {
            if (bookMstService.existsByIsbn(bookMstDto.getIsbn())) {
             result.rejectValue("isbn", "error.isbn.duplicate", "このISBNは既に登録されています");
             hasError = true;
-        }
+           }
            
            if (hasError) {
                throw new Exception("バリデーションエラー");
@@ -146,9 +140,6 @@ public class BookController {
        try {
            boolean hasError = false;
 
-        //    long NyuryokusareteitaId = bookMstDto.getId();
-        //    BookMstDto Sagaitaiyatu = bookMstService.findById(NyuryokusareteitaId);
-        //    String hikakusitaiyasuTitle = Sagaitaiyatu.getTitle();
      
            // 書籍名の変更があるかのバリデーション
 
@@ -177,10 +168,6 @@ public class BookController {
         }
 
 
-        //    ISBNの変更があるかどうかのバリデーション
-        //    if (bookMstService.findById(bookMstDto.getId()).getIsbn().equals (bookMstDto.getIsbn())){
-            // hasError = true;
-        //    }
 
         if (isIsbnChanged) {
             String isbn = bookMstDto.getIsbn();
@@ -225,7 +212,19 @@ ra.addFlashAttribute("successMessage", "書籍の変更が完了しました");
        }
     }
 
+    // 書籍削除
+    @GetMapping("/book/delete/{id}")
+    public String delete(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        boolean deleted = bookMstService.deleteBook(id);
     
+        if (deleted) {
+            redirectAttributes.addFlashAttribute("deleteMessage", "削除が完了しました");
+        } else {
+            redirectAttributes.addFlashAttribute("deleteMessage", "この書籍は既に削除されています");
+        }
+    
+        return "redirect:/book/index";
+    }
     
 
 }

@@ -1,5 +1,10 @@
 package jp.co.metateam.library.service;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.sql.Timestamp;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -97,6 +102,52 @@ public boolean existsByIsbnAndNotId(String isbn, Long id) {
     Optional<BookMst> book = bookMstRepository.findByIsbn(isbn);
     return book.isPresent() && !book.get().getId().equals(id);
 }
+
+@Transactional
+public boolean deleteBook(Long id) {
+    Optional<BookMst> optional = bookMstRepository.findById(id);
+    if (optional.isPresent()) {
+        BookMst book = optional.get();
+
+        ZonedDateTime japanTime = ZonedDateTime.now(ZoneId.of("Asia/Tokyo"));
+        Timestamp now = Timestamp.valueOf(japanTime.toLocalDateTime());
+
+        if (book.getDeletedFlag() == 1) {
+            // すでに削除済み → 削除日時が未設定なら設定して保存
+            if (book.getDeletedAt() == null || book.getDeletedAt().toString().isBlank()) {
+                book.setDeletedAt(now);
+                bookMstRepository.save(book);
+            }
+            return false; // 既に削除済み
+        }
+
+        // 通常の削除処理
+        book.setDeletedFlag(1);
+        book.setDeletedAt(now);
+        bookMstRepository.save(book);
+        return true;
+    }
+
+    return false; // 該当IDなし
+}
+
+
+public List<BookMstDto> findLimitedBooksOnlyNotDeleted() {
+    // 削除されていない書籍だけ取得するように修正
+    List<BookMst> books = this.bookMstRepository.findLimitedBooksOnlyNotDeleted(); // ←ここを変更
+    List<BookMstDto> bookMstDtoList = new ArrayList<>();
+
+    for (BookMst book : books) {
+        BookMstDto bookMstDto = new BookMstDto();
+        bookMstDto.setId(book.getId());
+        bookMstDto.setIsbn(book.getIsbn());
+        bookMstDto.setTitle(book.getTitle());
+        bookMstDtoList.add(bookMstDto);
+    }
+
+    return bookMstDtoList;
+}
+
 
 
 

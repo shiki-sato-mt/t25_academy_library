@@ -12,6 +12,7 @@
             <div th:replace="~{common :: header}"></div>
             <div class="inner_contens">
                 <div class="page_title">書籍一覧</div>
+                <div id="delete-message" th:if="${deleteMessage}" th:attr="data-message=${deleteMessage}"></div>
                  </div>
                 
 
@@ -33,9 +34,12 @@
                                     <img th:src="@{/images/icons/edit.png}" alt="編集" style="width:20px; height:20px; margin-left:8px;" />
                                 </a>
                             
-                                <!-- 削除ボタン -->
-                                <a th:href="@{'/book/delete'}" title="削除" onclick="return confirm('本当に削除しますか？')">
-                                    <img th:src="@{/images/icons/trash.png}" alt="削除" style="width:20px; height:20px; margin-left:4px;" />
+                        
+                             <!-- 削除ボタン -->
+                                <a href="javascript:void(0);" 
+                                th:attr="data-id=${book.id}, data-title=${book.title}, data-isbn=${book.isbn}" 
+                                onclick="confirmDelete(this)">
+                                <img th:src="@{/images/icons/trash.png}" alt="削除" style="width:20px; height:20px; margin-left:4px;" />
                                 </a>
 
                                 <span th:text="${book.title}">書籍タイトル</span>
@@ -74,6 +78,25 @@ if (errorMsg) {
     error.remove(); // 再表示防止
 }
 
+const del = document.getElementById("delete-message");
+    const delMsg = del?.dataset.message;
+    if (delMsg) {
+        alert(delMsg);
+        del.remove();
+    }
     });
 </script>
-
+<script>
+    function confirmDelete(element) {
+        const id = element.dataset.id;
+        const title = element.dataset.title;
+        const isbn = element.dataset.isbn;
+    
+        const currentURL = window.location.href;
+console.log(currentURL);
+        if (confirm(`以下の書籍を削除しますか？\n\nタイトル: ${title}\nISBN: ${isbn}`)) {
+            // 削除処理を実行（GETやPOSTでリクエスト）
+            window.location.href = `delete/${id}`;
+        }
+    }
+    </script>
